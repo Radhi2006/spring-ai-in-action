@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Board Game Buddy - Chapter 1</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#0f172a;color:#e2e8f0}
+header{background:linear-gradient(90deg,#16a34a,#0ea5e9);padding:22px 32px}
+header h1{margin:0;font-size:26px;color:#fff}header p{margin:4px 0 0;color:#ecfeff}
+main{max-width:860px;margin:28px auto;padding:0 16px}
+.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px;margin-bottom:18px}
+label{font-weight:600}textarea{width:100%;margin-top:8px;padding:12px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#e2e8f0;font-size:15px;min-height:70px}
+button{margin-top:12px;background:#16a34a;color:#fff;border:0;border-radius:8px;padding:10px 20px;font-size:15px;cursor:pointer}
+button:hover{background:#15803d}.chips span{display:inline-block;margin:6px 6px 0 0;padding:5px 10px;border-radius:20px;background:#334155;cursor:pointer;font-size:13px}
+.qa{border-left:4px solid #0ea5e9;padding:10px 14px;margin:12px 0;background:#0f172a;border-radius:6px}
+.q{color:#7dd3fc;font-weight:600}.a{margin-top:6px;white-space:pre-wrap}.meta{color:#94a3b8;font-size:12px;margin-top:6px}
+code{background:#0f172a;padding:2px 6px;border-radius:4px}
+</style></head><body>
+<header><h1>&#127922; Board Game Buddy</h1><p>Chapter 1 &mdash; Getting started with Spring AI (ChatClient + REST API)</p></header>
+<main>
+<div class="card">
+<label for="q">Ajukan pertanyaan (POST <code>/ask</code>)</label>
+<textarea id="q" placeholder="contoh: How many players can play UNO?"></textarea>
+<div class="chips">Contoh:
+<span>Why is the sky blue?</span><span>How many players can play Chess?</span><span>What is the objective of Monopoly?</span><span>How do you win Catan?</span></div>
+<button id="send">Kirim ke Spring AI</button>
+</div>
+<div class="card"><b>Riwayat jawaban</b><div id="log"></div></div>
+</main>
+<script>
+const q=document.getElementById('q'),log=document.getElementById('log');
+document.querySelectorAll('.chips span').forEach(s=>s.onclick=()=>{q.value=s.textContent;});
+async function ask(){const text=q.value.trim();if(!text)return;const t0=performance.now();
+ const div=document.createElement('div');div.className='qa';div.innerHTML='<div class="q"></div><div class="a">menunggu jawaban...</div><div class="meta"></div>';
+ div.querySelector('.q').textContent='Q: '+text;log.prepend(div);
+ try{const r=await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:text})});
+  const j=await r.json();div.querySelector('.a').textContent='A: '+j.answer;
+  div.querySelector('.meta').textContent='HTTP '+r.status+' \u2022 '+Math.round(performance.now()-t0)+' ms';}
+ catch(e){div.querySelector('.a').textContent='Error: '+e;}}
+document.getElementById('send').onclick=ask;
+(async()=>{const u=new URLSearchParams(location.search).get('q');if(u){for(const x of u.split('|')){q.value=x;await ask();}q.value='';}})();
+q.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask();}});
+</script></body></html>
